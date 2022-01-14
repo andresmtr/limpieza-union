@@ -1,0 +1,39 @@
+{% extends 'index.html' %}
+{% load static %}
+
+
+{% block cuerpo %}
+<section>
+
+    <div class="uploadFiles">
+
+        <div class="container">
+
+            <!--Simple Form-->
+
+            <h2>Unir bases</h2>
+            <h3 class="my-4">Cargue Las bases para unir</h3>
+            <p>Solo se permiten 9 archivos</p>
+            <form method="post" enctype="multipart/form-data">
+              {% csrf_token %}
+                  <input type="file" multiple name="upload" accept=".xlsx">
+                  <br>
+                  <button class="btn btn-primary my-4" type="submit">Enviar</button>
+            </form>
+        </div>
+
+
+        <div class="container">
+
+                    <h3>Descargar base unificada</h3>
+                    <a href="/media/UnionData/union.xlsx" download="union.xlsx"
+                        <button class="btn btn-primary my-4">Descargar</button>
+                    </a>
+
+        </div>
+    </div>
+
+
+</section>
+
+{% endblock cuerpo %}
