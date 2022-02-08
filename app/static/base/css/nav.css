@@ -18,6 +18,7 @@ a {
     align-items: center;
     padding: 1rem 1.5rem;
     background-color: #208bee;
+    color: white !important;
 }
 
 .hamburger {
@@ -39,6 +40,7 @@ a {
     justify-content: space-between;
     z-index:1; /* Posiciona primero el menu */
     align-items: center;
+    color: white;
 
 }
 
@@ -54,7 +56,7 @@ a:link {
 .nav-link{
     /* font-size: 1.6rem; */
     font-weight: 400;
-    color: white; /* Color nav */
+    color:white !important; /* Color nav */
 }
 
 .nav-link:hover{
@@ -89,6 +91,7 @@ a:link {
         transition: 0.3s;
         box-shadow:
             0 10px 27px rgba(0, 0, 0, 0.05);
+        color: white;
     }
 
     .nav-menu.active {

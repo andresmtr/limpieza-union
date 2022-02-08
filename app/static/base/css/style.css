@@ -23,3 +23,15 @@
 
 
 }
+
+.img{
+    width: 420px;
+    height: 200px;
+  }
+
+@media screen and (max-width: 720px) {
+    .img{
+      width: 210px;
+      height: 100px;
+    }
+  }
