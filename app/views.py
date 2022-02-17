@@ -1,7 +1,7 @@
 from django.shortcuts import render,HttpResponse,redirect
 
 
-#new import 
+#new import
 
 from django.http import HttpResponse, HttpResponseNotFound
 from django.core.files.storage import FileSystemStorage
@@ -30,12 +30,12 @@ class Beginning():
 
         #upload files
 
-        ################################ 
+        ################################
         ############# upload base
 
-        folder = 'media/dirt' 
+        folder = 'media/dirt'
 
-        filename = 'media/dirt/dirt.xlsx' 
+        filename = 'media/dirt/dirt.xlsx'
         try:
             if request.method == 'POST' and request.FILES['upload']:
                 upload = request.FILES['upload']
@@ -47,15 +47,15 @@ class Beginning():
                 file_url = fss.url(file)
 
 
-                
-            ################################ 
+
+            ################################
             ############# Clean data
                 df1 = pd.read_excel(filename)
 
                 ### Changes name columns
                 dfnuevo = df1.rename(columns={'Fecha de llegada a Colombia (Día/Mes/Año)':'Fecha de llegada a Colombia',
-                            'Sexo biológico':'Sexo', 
-                            'Lugar de procedencia\n':'Lugar de procedencia', 
+                            'Sexo biológico':'Sexo',
+                            'Lugar de procedencia\n':'Lugar de procedencia',
                             'Edad':'Edad (especifiquela en años)',
                             'Fecha diligenciamiento (Día/Mes/Año) ':'Fecha diligenciamiento ',
                             'Canal para el reporte':'Canal o medio de reporte ',
@@ -72,10 +72,10 @@ class Beginning():
                 ### Create columns
                 if 'Canal o medio de reporte ' not in dfnuevo:
                     dfnuevo['Canal o medio de reporte '] = np.nan
-                    
+
                 if 'Étnia' not in dfnuevo:
                     dfnuevo['Étnia'] = np.nan
-                    
+
                 # if 'Indígena' not in dfnuevo:
                 #     dfnuevo['Indígena'] = np.nan
 
@@ -155,44 +155,44 @@ class Beginning():
                         to_replace=['Hombre '],
                         value='Masculino',
                         inplace=True
-                    )                       
+                    )
                 sexo ()
 
                 ### Verify days and months
 
                 def VerificacionDiasMeses(dfnuevo):
-        
+
                     global lista_dia, lista_meses
 
                     lista_dia = []
                     lista_meses = []
-                    
+
                     for i in range(contar):
-                    
+
                         try:
                             Dias = dfnuevo['Fecha diligenciamiento '][i] - dfnuevo['Fecha de llegada a Colombia'][i]
                             lista_dia.append(Dias.days)
                             lista_meses.append(Dias.days/30)
-                            
+
                         except:
                             Dias = ''
                             lista_dia.append(Dias)
                             lista_meses.append(np.nan)
-                            
+
                 VerificacionDiasMeses(dfnuevo)
 
                 dfnuevo['Días entre llegada e identificación'] = lista_dia
                 dfnuevo['Tiempo en meses'] = lista_meses
 
-                ### Correct dates 
+                ### Correct dates
 
                 def CompararFechasIngresoDiligenciamiento(dfnuevo):
-        
+
                     number = dfnuevo['Días entre llegada e identificación']
-                    if not isinstance(number,int): 
+                    if not isinstance(number,int):
                         css = 'background-color: yellow'
                         #return None
-                    elif  int(number) < 0:
+                    elif  number < 0:
                         css = 'background-color: yellow'
                     else:
                         css = 'background-color: none'
@@ -217,10 +217,33 @@ class Beginning():
                     if (Sexo == 'Masculino') and (Lactantes == 'Si'):
                         css = 'background-color: deepskyblue'
                     elif (Sexo == 'Masculino') and (Lactantes == 'si'):
-                        css = 'background-color: deepskyblue'    
+                        css = 'background-color: deepskyblue'
                     else:
                         css = 'background-color: none'
                     return [css] * len(dfnuevo)
+                    
+
+                ## resaltar duplicados
+
+                ParaEliminarRepetidos = dfnuevo['Documento de Identidad']
+                ParaEliminarRepetidos.drop_duplicates(keep=False, inplace=True)
+                ParaEliminarRepetidos = list(ParaEliminarRepetidos)
+                contar_en_documentos = len(dfnuevo.index)
+
+                def duplicados(dfnuevo):
+                    
+                    Lista_Documentos_identidad = dfnuevo['Documento de Identidad']
+                    
+                    for i in range(contar_en_documentos):
+                        
+                        if Lista_Documentos_identidad in ParaEliminarRepetidos:
+                            css = 'background-color: none'
+                        else: 
+                            css = 'background-color: IndianRed'
+                        return [css] * len(dfnuevo)
+                    
+
+                #duplicados(dfnuevo)
 
                 ### Reorganizar columnas
 
@@ -235,29 +258,27 @@ class Beginning():
 
                 dfnuevo.style.\
                     apply(CompararFechasIngresoDiligenciamiento, subset=['Fecha de llegada a Colombia', 'Fecha diligenciamiento ', 'Días entre llegada e identificación', 'Tiempo en meses'], axis=1).\
+                    apply(duplicados, subset=['Documento de Identidad'], axis=1).\
                     apply(verificaciónGestantes, subset=['Sexo', 'Gestante'], axis=1).\
                     apply(verificaciónLactantes, subset=['Sexo', 'Lactante'], axis=1).\
                     highlight_null(null_color='orange').\
                     to_excel('media/clean/clean.xlsx', engine='openpyxl')
-                    # highlight_null(null_color='orange').\
-                    #hide_index()
-                    #to_excel('media/clean/clean.xlsx', engine='openpyxl')                
 
-            ################################ 
+            ################################
             ############# upload multiple files
 
-            context = { 
+            context = {
 
                 'uno':uno,
                 'file_url': file_url,
 
             }
 
-            return render(request, 'index.html', context) 
-        
+            return render(request, 'index.html', context)
+
         # Si no carga nada, devuelve a la misma pagina
         except:
-            return render(request, 'index.html',) 
+            return render(request, 'index.html',)
 
 
 class loadFiles():
@@ -266,14 +287,14 @@ class loadFiles():
 
         uno = 1
 
-        folder = 'media/loadFiles' 
-        folderfiles = 'media/loadFiles' 
-            #folderLista = 'media/lista' 
-        folderUnion = 'media/UnionData' 
+        folder = 'media/loadFiles'
+        folderfiles = 'media/loadFiles'
+            #folderLista = 'media/lista'
+        folderUnion = 'media/UnionData'
 
         try:
 
-        
+
             if request.method == 'POST' and request.FILES['upload']:
                 #upload = request.FILES['upload']
                 upload = request.FILES.getlist("upload")
@@ -286,7 +307,7 @@ class loadFiles():
                 arr = os.listdir(folderfiles)
 
                 contar = len(arr)
-                        
+
                 for i in range(contar):
 
                     name = str(arr[i])
@@ -294,7 +315,7 @@ class loadFiles():
 
                     globals()[f'df_{i}'] = pd.read_excel(finalPath, index_col=None)
                         #globals()[f'df_{i}'] = pd.DataFrame(os.path.join(folder,name))
-            
+
                 if contar == 1:
                     frames = [df_0]
                 elif contar == 2:
@@ -314,7 +335,7 @@ class loadFiles():
                 elif contar == 9:
                     frames = [df_0, df_1, df_2, df_3, df_4, df_5, df_6, df_7, df_8]
                 else:
-                    frames = [df_0, df_1, df_2, df_3, df_4, df_5, df_6, df_7, df_8] 
+                    frames = [df_0, df_1, df_2, df_3, df_4, df_5, df_6, df_7, df_8]
 
 
                 UnionDf = pd.concat(frames)
@@ -325,13 +346,13 @@ class loadFiles():
 
 
                 def CompararFechasIngresoDiligenciamiento(UnionDf):
-            
+
                     number = UnionDf['Días entre llegada e identificación']
-                    if not isinstance(number,int): 
+                    if not isinstance(number,int):
                         css = 'background-color: yellow'
                         #return None
-                            
-                    elif  int(number) < 0:
+
+                    elif  number < 0:
                         css = 'background-color: yellow'
                     else:
                         css = 'background-color: none'
@@ -356,6 +377,25 @@ class loadFiles():
                         css = 'background-color: none'
                     return [css] * len(UnionDf)
 
+                                ## resaltar duplicados
+
+                ParaEliminarRepetidos = UnionDf['Documento de Identidad']
+                ParaEliminarRepetidos.drop_duplicates(keep=False, inplace=True)
+                ParaEliminarRepetidos = list(ParaEliminarRepetidos)
+                contar_en_documentos = len(UnionDf.index)
+
+                def duplicados(UnionDf):
+                    
+                    Lista_Documentos_identidad = UnionDf['Documento de Identidad']
+                    
+                    for i in range(contar_en_documentos):
+                        
+                        if Lista_Documentos_identidad in ParaEliminarRepetidos:
+                            css = 'background-color: none'
+                        else: 
+                            css = 'background-color: IndianRed'
+                        return [css] * len(UnionDf)
+
 
                 # UnionDf = UnionDf.reindex(columns=['Tipo','Mes','Fecha de llegada a Colombia','Edad','Sexo','OSIGD','Nombres ',
                 #                                 'Apellidos','Documento de Identidad','Lugar de procedencia','Lugar de Identificación ',
@@ -366,7 +406,7 @@ class loadFiles():
                 #                                 'Inasistencia alimentaria','Desescolarizado','Trabajo Infantil ','Étnia','Perfil migratorio','Indígena','Otra Condición'])
 
                 UnionDf.reset_index(drop=True).style.\
-                    apply(CompararFechasIngresoDiligenciamiento, subset=['Fecha de llegada a Colombia', 'Fecha diligenciamiento ', 'Días entre llegada e identificación', 'Tiempo en meses'], axis=1).\
+                    apply(duplicados, subset=['Documento de Identidad'], axis=1).\
                     apply(verificaciónGestantes, subset=['Sexo', 'Gestante'], axis=1).\
                     apply(verificaciónLactantes, subset=['Sexo', 'Lactante'], axis=1).\
                     highlight_null(null_color='orange').\
@@ -382,11 +422,10 @@ class loadFiles():
 
 
             # return redirect("app:cargar")
-            return render(request, 'union.html') 
- 
+            return render(request, 'union.html')
+
         # else:
 
         except:
 
-            return render(request, 'union.html') 
-
+            return render(request, 'union.html')
